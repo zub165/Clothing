@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothing Business Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* General Styles */
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            padding: 2rem;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--background-color);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: var(--background-color);
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar input {
+            padding-left: 2.5rem;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 1rem;
+            }
+
+            .sidebar .logo span,
+            .sidebar .nav-item span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Add this to your existing styles */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        section {
+            scroll-margin-top: 2rem;
+            padding: 2rem 0;
+            min-height: calc(100vh - 4rem);
+        }
+
+        .main-content {
+            scroll-padding-top: 2rem;
+        }
+
+        /* Update the navigation styles */
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            position: relative;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 70%;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* Add these styles for the data management section */
+        .data-management {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-tshirt"></i>
+                <span>Clothing Manager</span>
+            </div>
+            <nav>
+                <a href="#inventory" class="nav-item active" onclick="scrollToSection('inventory')">
+                    <i class="fas fa-box"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="#orders" class="nav-item" onclick="scrollToSection('orders')">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="#payments" class="nav-item" onclick="scrollToSection('payments')">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Payments</span>
+                </a>
+                <a href="#profit-loss" class="nav-item" onclick="scrollToSection('profit-loss')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Profit & Loss</span>
+                </a>
+                <a href="#data-management" class="nav-item" onclick="scrollToSection('data-management')">
+                    <i class="fas fa-database"></i>
+                    <span>Data Management</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Inventory Section -->
+            <section id="inventory">
+                <div class="header">
+                    <h2 class="page-title">Inventory Management</h2>
+                </div>
+                <div class="card">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInventory" class="form-control" placeholder="Search inventory items..." oninput="filterInventory()">
+                    </div>
+                    <div class="form-group">
+                        <label>Add New Item</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <input type="text" id="itemName" class="form-control" placeholder="Item Name">
+                            <input type="number" id="stockQty" class="form-control" placeholder="Stock Quantity">
+                            <input type="number" id="purchasePrice" class="form-control" placeholder="Purchase Price">
+                            <input type="number" id="sellingPrice" class="form-control" placeholder="Selling Price">
+                        </div>
+                        <button onclick="addInventory()" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Stock</th>
+                                    <th>Purchase Price</th>
+                                    <th>Selling Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders">
+                <div class="header">
+                    <h2 class="page-title">Order Management</h2>
+                </div>
+                <div class="card">
+                    <div class="form-group">
+                        <label>Place New Order</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <input type="text" id="orderItem" class="form-control" placeholder="Item Name">
+                            <input type="number" id="orderQty" class="form-control" placeholder="Quantity">
+                        </div>
+                        <button onclick="placeOrder()" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fas fa-shopping-cart"></i> Place Order
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Total Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payments Section -->
+            <section id="payments">
+                <div class="header">
+                    <h2 class="page-title">Payment Tracking</h2>
+                </div>
+                <div class="card">
+                    <div class="form-group">
+                        <label>Record Payment</label>
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem;">
+                            <input type="number" id="incomingPayment" class="form-control" placeholder="Payment Amount">
+                            <button onclick="trackPayment()" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Payment
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profit & Loss Section -->
+            <section id="profit-loss">
+                <div class="header">
+                    <h2 class="page-title">Profit & Loss Analysis</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Revenue</h3>
+                        <div class="value" id="totalRevenue">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Expenses</h3>
+                        <div class="value" id="totalExpenses">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Net Profit</h3>
+                        <div class="value" id="netProfit">$0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Management Section -->
+            <section id="data-management">
+                <div class="header">
+                    <h2 class="page-title">Data Management</h2>
+                </div>
+                <div class="card">
+                    <div class="form-group">
+                        <label>Import/Export Data</label>
+                        <div class="data-actions">
+                            <button onclick="exportToExcel()" class="btn btn-primary">
+                                <i class="fas fa-file-export"></i> Export to Excel
+                            </button>
+                            <label for="excelFile" class="file-label">
+                                <i class="fas fa-file-import"></i> Import from Excel
+                            </label>
+                            <input type="file" id="excelFile" class="file-input" accept=".xlsx, .xls" onchange="importFromExcel(event)">
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Data Storage
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        let payments = JSON.parse(localStorage.getItem('payments')) || [];
+        let totalRevenue = parseFloat(localStorage.getItem('totalRevenue')) || 0;
+        let totalExpenses = parseFloat(localStorage.getItem('totalExpenses')) || 0;
+
+        // Save Data to Local Storage
+        function saveData() {
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            localStorage.setItem('orders', JSON.stringify(orders));
+            localStorage.setItem('payments', JSON.stringify(payments));
+            localStorage.setItem('totalRevenue', totalRevenue);
+            localStorage.setItem('totalExpenses', totalExpenses);
+        }
+
+        // Add Inventory
+        function addInventory() {
+            const name = document.getElementById("itemName").value;
+            const stock = parseInt(document.getElementById("stockQty").value);
+            const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
+            const sellingPrice = parseFloat(document.getElementById("sellingPrice").value);
+
+            if (name && stock && purchasePrice && sellingPrice) {
+                inventory.push({ name, stock, purchasePrice, sellingPrice });
+                totalExpenses += stock * purchasePrice;
+                updateInventoryTable();
+                updateProfitLoss();
+                saveData();
+                clearInventoryForm();
+            } else {
+                alert("Please fill in all fields!");
+            }
+        }
+
+        // Clear Inventory Form
+        function clearInventoryForm() {
+            document.getElementById("itemName").value = "";
+            document.getElementById("stockQty").value = "";
+            document.getElementById("purchasePrice").value = "";
+            document.getElementById("sellingPrice").value = "";
+        }
+
+        // Update Inventory Table
+        function updateInventoryTable() {
+            const table = document.getElementById("inventoryTable");
+            table.innerHTML = inventory.map((item, index) => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.stock}</td>
+                    <td>$${item.purchasePrice.toFixed(2)}</td>
+                    <td>$${item.sellingPrice.toFixed(2)}</td>
+                    <td>
+                        <button onclick="editInventory(${index})" class="btn btn-primary" style="padding: 0.5rem;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteInventory(${index})" class="btn btn-danger" style="padding: 0.5rem;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        // Edit Inventory
+        function editInventory(index) {
+            const item = inventory[index];
+            document.getElementById("itemName").value = item.name;
+            document.getElementById("stockQty").value = item.stock;
+            document.getElementById("purchasePrice").value = item.purchasePrice;
+            document.getElementById("sellingPrice").value = item.sellingPrice;
+            deleteInventory(index);
+        }
+
+        // Delete Inventory
+        function deleteInventory(index) {
+            const item = inventory.splice(index, 1)[0];
+            totalExpenses -= item.stock * item.purchasePrice;
+            updateInventoryTable();
+            updateProfitLoss();
+            saveData();
+        }
+
+        // Place Order
+        function placeOrder() {
+            const name = document.getElementById("orderItem").value;
+            const qty = parseInt(document.getElementById("orderQty").value);
+            const item = inventory.find(i => i.name === name);
+
+            if (item && qty <= item.stock) {
+                const total = qty * item.sellingPrice;
+                orders.push({ name, qty, total, date: new Date().toLocaleDateString() });
+                item.stock -= qty;
+                totalRevenue += total;
+                updateOrdersTable();
+                updateInventoryTable();
+                updateProfitLoss();
+                saveData();
+                document.getElementById("orderItem").value = "";
+                document.getElementById("orderQty").value = "";
+            } else {
+                alert("Item not available or insufficient stock!");
+            }
+        }
+
+        // Update Orders Table
+        function updateOrdersTable() {
+            const table = document.getElementById("ordersTable");
+            table.innerHTML = orders.map((order, index) => `
+                <tr>
+                    <td>${order.name}</td>
+                    <td>${order.qty}</td>
+                    <td>$${order.total.toFixed(2)}</td>
+                    <td>
+                        <button onclick="deleteOrder(${index})" class="btn btn-danger" style="padding: 0.5rem;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        // Delete Order
+        function deleteOrder(index) {
+            const order = orders.splice(index, 1)[0];
+            totalRevenue -= order.total;
+            const item = inventory.find(i => i.name === order.name);
+            if (item) {
+                item.stock += order.qty;
+            }
+            updateOrdersTable();
+            updateInventoryTable();
+            updateProfitLoss();
+            saveData();
+        }
+
+        // Track Payment
+        function trackPayment() {
+            const amount = parseFloat(document.getElementById("incomingPayment").value);
+            if (amount) {
+                payments.push({
+                    amount,
+                    date: new Date().toLocaleDateString()
+                });
+                updatePaymentsTable();
+                saveData();
+                document.getElementById("incomingPayment").value = "";
+            }
+        }
+
+        // Update Payments Table
+        function updatePaymentsTable() {
+            const table = document.getElementById("paymentsTable");
+            table.innerHTML = payments.map(payment => `
+                <tr>
+                    <td>$${payment.amount.toFixed(2)}</td>
+                    <td>${payment.date}</td>
+                </tr>
+            `).join("");
+        }
+
+        // Update Profit/Loss
+        function updateProfitLoss() {
+            document.getElementById("totalRevenue").innerText = `$${totalRevenue.toFixed(2)}`;
+            document.getElementById("totalExpenses").innerText = `$${totalExpenses.toFixed(2)}`;
+            document.getElementById("netProfit").innerText = `$${(totalRevenue - totalExpenses).toFixed(2)}`;
+        }
+
+        // Filter Inventory
+        function filterInventory() {
+            const searchTerm = document.getElementById("searchInventory").value.toLowerCase();
+            const table = document.getElementById("inventoryTable");
+            
+            table.innerHTML = inventory
+                .filter(item => item.name.toLowerCase().includes(searchTerm))
+                .map(item => {
+                    const index = inventory.findIndex(i => i.name === item.name);
+                    return `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.stock}</td>
+                            <td>$${item.purchasePrice.toFixed(2)}</td>
+                            <td>$${item.sellingPrice.toFixed(2)}</td>
+                            <td>
+                                <button onclick="editInventory(${index})" class="btn btn-primary" style="padding: 0.5rem;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteInventory(${index})" class="btn btn-danger" style="padding: 0.5rem;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                })
+                .join("");
+
+            // If no results found, show a message
+            if (searchTerm && table.innerHTML === '') {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 1rem;">
+                            No items found matching "${searchTerm}"
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Update the scrollToSection function
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                // Update active state before scrolling
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                    if (nav.getAttribute('href') === `#${sectionId}`) {
+                        nav.classList.add('active');
+                    }
+                });
+
+                // Smooth scroll to section
+                section.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+                // Update URL hash without jumping
+                history.pushState(null, null, `#${sectionId}`);
+            }
+        }
+
+        // Add scroll spy functionality
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section');
+            let currentSection = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - sectionHeight / 3)) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+                if (nav.getAttribute('href') === `#${currentSection}`) {
+                    nav.classList.add('active');
+                }
+            });
+        });
+
+        // Handle initial hash in URL
+        window.addEventListener('load', function() {
+            if (window.location.hash) {
+                const sectionId = window.location.hash.substring(1);
+                scrollToSection(sectionId);
+            }
+        });
+
+        // Initialize Tables
+        updateInventoryTable();
+        updateOrdersTable();
+        updatePaymentsTable();
+        updateProfitLoss();
+
+        // Export data to Excel
+        function exportToExcel() {
+            // Prepare data for export
+            const inventorySheet = XLSX.utils.json_to_sheet(inventory.map(item => ({
+                ...item,
+                timestamp: new Date().toISOString()
+            })));
+            
+            const ordersSheet = XLSX.utils.json_to_sheet(orders.map(order => ({
+                ...order,
+                timestamp: new Date().toISOString()
+            })));
+            
+            const paymentsSheet = XLSX.utils.json_to_sheet(payments.map(payment => ({
+                ...payment,
+                timestamp: new Date().toISOString()
+            })));
+
+            const financialsSheet = XLSX.utils.json_to_sheet([{
+                totalRevenue,
+                totalExpenses,
+                netProfit: totalRevenue - totalExpenses,
+                timestamp: new Date().toISOString()
+            }]);
+
+            // Create workbook with multiple sheets
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, inventorySheet, "Inventory");
+            XLSX.utils.book_append_sheet(wb, ordersSheet, "Orders");
+            XLSX.utils.book_append_sheet(wb, paymentsSheet, "Payments");
+            XLSX.utils.book_append_sheet(wb, financialsSheet, "Financials");
+
+            // Save the file
+            XLSX.writeFile(wb, `clothing_business_data_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        // Import data from Excel
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                try {
+                    // Import inventory
+                    if (workbook.SheetNames.includes('Inventory')) {
+                        const newInventory = XLSX.utils.sheet_to_json(workbook.Sheets['Inventory']);
+                        inventory = mergeData(inventory, newInventory, 'name');
+                    }
+
+                    // Import orders
+                    if (workbook.SheetNames.includes('Orders')) {
+                        const newOrders = XLSX.utils.sheet_to_json(workbook.Sheets['Orders']);
+                        orders = mergeData(orders, newOrders, 'name');
+                    }
+
+                    // Import payments
+                    if (workbook.SheetNames.includes('Payments')) {
+                        const newPayments = XLSX.utils.sheet_to_json(workbook.Sheets['Payments']);
+                        payments = mergeData(payments, newPayments, 'date');
+                    }
+
+                    // Import financials
+                    if (workbook.SheetNames.includes('Financials')) {
+                        const financials = XLSX.utils.sheet_to_json(workbook.Sheets['Financials'])[0];
+                        if (financials) {
+                            totalRevenue = parseFloat(financials.totalRevenue) || totalRevenue;
+                            totalExpenses = parseFloat(financials.totalExpenses) || totalExpenses;
+                        }
+                    }
+
+                    // Update UI and save data
+                    updateInventoryTable();
+                    updateOrdersTable();
+                    updatePaymentsTable();
+                    updateProfitLoss();
+                    saveData();
+
+                    alert('Data imported successfully!');
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert('Error importing data. Please check the file format.');
+                }
+
+                // Reset file input
+                event.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Helper function to merge data while preserving timestamps
+        function mergeData(existingData, newData, keyField) {
+            const merged = [...existingData];
+            const existingKeys = new Set(existingData.map(item => item[keyField]));
+
+            newData.forEach(item => {
+                if (!existingKeys.has(item[keyField])) {
+                    merged.push(item);
+                    existingKeys.add(item[keyField]);
+                }
+            });
+
+            return merged.sort((a, b) => {
+                const dateA = new Date(a.timestamp || 0);
+                const dateB = new Date(b.timestamp || 0);
+                return dateB - dateA;
+            });
+        }
+    </script>
+</body>
+</html>
