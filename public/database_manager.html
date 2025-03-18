@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        // Fetch database status
+        async function fetchStatus() {
+            try {
+                const response = await fetch(`${API_URL}/status`);
+                const data = await response.json();
+                
+                document.getElementById('connection-status').textContent = data.status;
+                document.getElementById('db-host').textContent = data.host;
+                document.getElementById('db-name').textContent = data.database;
+                document.getElementById('db-user').textContent = data.user;
+                document.getElementById('table-count').textContent = data.tables;
+            } catch (error) {
+                console.error('Error fetching status:', error);
+            }
+        }
+
+        // Fetch table information
+        async function fetchTables() {
+            try {
+                const response = await fetch(`${API_URL}/tables`);
+                const tables = await response.json();
+                
+                const tbody = document.getElementById('table-list');
+                tbody.innerHTML = '';
+                
+                tables.forEach(table => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4">${table.name}</td>
+                        <td class="px-6 py-4">${table.records || 0}</td>
+                        <td class="px-6 py-4">${formatBytes(table.size || 0)}</td>
+                        <td class="px-6 py-4">${formatDate(table.lastUpdated)}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="viewTable('${table.name}')" class="text-blue-600 hover:text-blue-900">View</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching tables:', error);
+            }
+        }
+
+        // View table contents
+        async function viewTable(tableName) {
+            try {
+                const response = await fetch(`${API_URL}/table/${tableName}`);
+                const data = await response.json();
+                
+                const modal = document.getElementById('table-modal');
+                const content = document.getElementById('table-content');
+                
+                content.innerHTML = `
+                    <h3 class="text-lg font-bold mb-4">${tableName}</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    ${Object.keys(data[0] || {}).map(key => 
+                                        `<th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${key}</th>`
+                                    ).join('')}
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${data.map(row => `
+                                    <tr>
+                                        ${Object.values(row).map(value => 
+                                            `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${value}</td>`
+                                        ).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                modal.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error viewing table:', error);
+            }
+        }
+
+        // Create backup
+        async function createBackup() {
+            try {
+                const response = await fetch(`${API_URL}/backup`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Backup failed: ' + data.error);
+                } else {
+                    alert('Backup created successfully');
+                    fetchBackups();
+                }
+            } catch (error) {
+                console.error('Error creating backup:', error);
+                alert('Backup failed');
+            }
+        }
+
+        // Restore backup
+        async function restoreBackup(filename) {
+            if (!confirm('Are you sure you want to restore this backup? This will overwrite current data.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/restore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Restore failed: ' + data.error);
+                } else {
+                    alert('Backup restored successfully');
+                    fetchTables();
+                }
+            } catch (error) {
+                console.error('Error restoring backup:', error);
+                alert('Restore failed');
+            }
+        }
+
+        // Reset database
+        async function resetDatabase() {
+            if (!confirm('Are you sure you want to reset the database? This will delete all data.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/reset`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Reset failed: ' + data.error);
+                } else {
+                    alert('Database reset successfully');
+                    fetchTables();
+                }
+            } catch (error) {
+                console.error('Error resetting database:', error);
+                alert('Reset failed');
+            }
+        }
+
+        // Fetch backup history
+        async function fetchBackups() {
+            try {
+                const response = await fetch(`${API_URL}/backups`);
+                const backups = await response.json();
+                
+                const tbody = document.getElementById('backup-history');
+                tbody.innerHTML = '';
+                
+                backups.forEach(backup => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4">${formatDate(backup.date)}</td>
+                        <td class="px-6 py-4">${formatBytes(backup.size)}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                ${backup.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="${API_URL}/backup/${backup.filename}" class="text-blue-600 hover:text-blue-900 mr-4">Download</a>
+                            <button onclick="restoreBackup('${backup.filename}')" class="text-green-600 hover:text-green-900">Restore</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching backups:', error);
+            }
+        }
+
+        // Utility functions
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(date) {
+            if (!date) return 'N/A';
+            return new Date(date).toLocaleString();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStatus();
+            fetchTables();
+            fetchBackups();
+        });
+
+        // SQL Operations Functions
+        function executeQuery() {
+            const query = document.getElementById('sqlQuery').value;
+            fetch('/api/execute-query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayQueryResults(data);
+            })
+            .catch(error => {
+                console.error('Error executing query:', error);
+                alert('Error executing query');
+            });
+        }
+
+        function saveQuery() {
+            const query = document.getElementById('sqlQuery').value;
+            // Implement query saving functionality
+        }
+
+        function displayQueryResults(data) {
+            const resultDiv = document.getElementById('queryResult');
+            if (Array.isArray(data)) {
+                const table = createResultTable(data);
+                resultDiv.innerHTML = '';
+                resultDiv.appendChild(table);
+            } else {
+                resultDiv.innerHTML = `<p>Query executed successfully: ${JSON.stringify(data)}</p>`;
+            }
+        }
+
+        function createResultTable(data) {
+            const table = document.createElement('table');
+            table.className = 'min-w-full divide-y divide-gray-200';
+            
+            // Create header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            Object.keys(data[0] || {}).forEach(key => {
+                const th = document.createElement('th');
+                th.className = 'px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
+                th.textContent = key;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create body
+            const tbody = document.createElement('tbody');
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                Object.values(row).forEach(value => {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900';
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            
+            return table;
+        }
+
+        // Data Visualization Functions
+        function generateChart() {
+            const chartType = document.getElementById('chartType').value;
+            const dataSource = document.getElementById('dataSource').value;
+            
+            fetch(`/api/chart-data/${dataSource}`)
+            .then(response => response.json())
+            .then(data => {
+                createChart(chartType, data);
+            })
+            .catch(error => {
+                console.error('Error generating chart:', error);
+                alert('Error generating chart');
+            });
+        }
+
+        function createChart(type, data) {
+            const ctx = document.getElementById('chartContainer').getContext('2d');
+            
+            // Destroy existing chart if any
+            if (window.currentChart) {
+                window.currentChart.destroy();
+            }
+            
+            // Create new chart
+            window.currentChart = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: data.label,
+                        data: data.values,
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(255, 206, 86, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Import/Export Functions
+        function exportToExcel() {
+            fetch('/api/export-excel')
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'database_export.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error exporting to Excel:', error);
+                alert('Error exporting to Excel');
+            });
+        }
+
+        function importFromExcel() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx,.xls';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                fetch('/api/import-excel', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Import successful');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error importing from Excel:', error);
+                    alert('Error importing from Excel');
+                });
+            };
+            input.click();
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Database Manager</h1>
+            <p class="mt-2 text-gray-600">Manage your database with ease</p>
+        </div>
+
+        <!-- Connection Status -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Connection Status</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600">Status</p>
+                    <p id="connection-status" class="font-semibold">-</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Host</p>
+                    <p id="db-host" class="font-semibold">-</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Database</p>
+                    <p id="db-name" class="font-semibold">-</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Tables</p>
+                    <p id="table-count" class="font-semibold">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup and Restore -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Backup and Restore</h2>
+                <div>
+                    <button onclick="createBackup()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Create Backup</button>
+                    <button onclick="resetDatabase()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 ml-2">Reset Database</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backup-history" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table Management -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Table Management</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Table Name</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Records</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-list" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table View Modal -->
+        <div id="table-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 shadow-lg rounded-md bg-white">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Table Contents</h2>
+                    <button onclick="document.getElementById('table-modal').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="table-content"></div>
+            </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Data Management</h2>
+            
+            <!-- Import/Export Section -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4">Import/Export Data</h3>
+                <div class="flex gap-4 mb-6">
+                    <button onclick="exportToExcel()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-file-export mr-2"></i> Export to Excel
+                    </button>
+                    <button onclick="importFromExcel()" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-file-import mr-2"></i> Import from Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- SQL Operations Section -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4">SQL Operations</h3>
+                <div class="mb-4">
+                    <textarea id="sqlQuery" class="w-full h-32 p-2 border rounded-lg" placeholder="Enter your SQL query here..."></textarea>
+                </div>
+                <div class="flex gap-4 mb-6">
+                    <button onclick="executeQuery()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-play mr-2"></i> Execute Query
+                    </button>
+                    <button onclick="saveQuery()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-save mr-2"></i> Save Query
+                    </button>
+                </div>
+                <div id="queryResult" class="border rounded-lg p-4 bg-gray-50 overflow-x-auto">
+                    <p class="text-gray-500">Query results will appear here...</p>
+                </div>
+            </div>
+
+            <!-- Data Visualization Section -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Data Visualization</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Chart Type Selection -->
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold mb-2">Chart Settings</h4>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Chart Type</label>
+                            <select id="chartType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <option value="bar">Bar Chart</option>
+                                <option value="line">Line Chart</option>
+                                <option value="pie">Pie Chart</option>
+                                <option value="scatter">Scatter Plot</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Data Source</label>
+                            <select id="dataSource" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <option value="inventory">Inventory</option>
+                                <option value="orders">Orders</option>
+                                <option value="payments">Payments</option>
+                                <option value="financial">Financial Summary</option>
+                            </select>
+                        </div>
+                        <button onclick="generateChart()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-chart-bar mr-2"></i> Generate Chart
+                        </button>
+                    </div>
+                    
+                    <!-- Chart Display Area -->
+                    <div class="border rounded-lg p-4">
+                        <div id="chartContainer" class="w-full h-64">
+                            <!-- Chart will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

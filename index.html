@@ -245,7 +245,7 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .sidebar {
+        .sidebar {
                 width: 70px;
                 padding: 1rem;
             }
@@ -570,8 +570,8 @@
 </head>
 <body>
     <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar">
+<!-- Sidebar -->
+<div class="sidebar">
             <div class="logo">
                 <i class="fas fa-tshirt"></i>
                 <span>Clothing Manager</span>
@@ -598,20 +598,20 @@
                     <span>Data Management</span>
                 </a>
             </nav>
-        </div>
+</div>
 
-        <!-- Main Content -->
-        <div class="main-content">
+<!-- Main Content -->
+<div class="main-content">
             <!-- Inventory Section -->
             <section id="inventory">
                 <div class="header">
                     <h2 class="page-title">Inventory Management</h2>
                 </div>
                 <div class="card">
-                    <div class="search-bar">
+        <div class="search-bar">
                         <i class="fas fa-search"></i>
                         <input type="text" id="searchInventory" class="form-control" placeholder="Search inventory items..." oninput="filterInventory()">
-                    </div>
+        </div>
                     <div class="form-group">
                         <label>Add New Item</label>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
@@ -625,17 +625,17 @@
                         </button>
                     </div>
                     <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
+        <table>
+            <thead>
+                <tr>
                                     <th style="width: 25%;">Item Name</th>
                                     <th style="width: 15%;">Stock</th>
                                     <th style="width: 20%;">Purchase Price ($)</th>
                                     <th style="width: 20%;">Selling Price ($)</th>
                                     <th style="width: 20%;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTable"></tbody>
+                </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="5" class="table-summary">
@@ -643,7 +643,7 @@
                                     </td>
                                 </tr>
                             </tfoot>
-                        </table>
+        </table>
                     </div>
                 </div>
             </section>
@@ -665,17 +665,17 @@
                         </button>
                     </div>
                     <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
+        <table>
+            <thead>
+                <tr>
                                     <th style="width: 25%;">Item Name</th>
                                     <th style="width: 15%;">Quantity</th>
                                     <th style="width: 20%;">Unit Price ($)</th>
                                     <th style="width: 20%;">Total Amount ($)</th>
                                     <th style="width: 20%;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ordersTable"></tbody>
+                </tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="5" class="table-summary">
@@ -684,7 +684,7 @@
                                     </td>
                                 </tr>
                             </tfoot>
-                        </table>
+        </table>
                     </div>
                 </div>
             </section>
@@ -705,16 +705,16 @@
                         </div>
                     </div>
                     <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
+        <table>
+            <thead>
+                <tr>
                                     <th style="width: 20%;">Payment ID</th>
                                     <th style="width: 25%;">Amount ($)</th>
                                     <th style="width: 25%;">Date</th>
                                     <th style="width: 30%;">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="paymentsTable"></tbody>
+                </tr>
+            </thead>
+            <tbody id="paymentsTable"></tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="4" class="table-summary">
@@ -723,7 +723,7 @@
                                     </td>
                                 </tr>
                             </tfoot>
-                        </table>
+        </table>
                     </div>
                 </div>
             </section>
@@ -732,12 +732,12 @@
             <section id="profit-loss">
                 <div class="header">
                     <h2 class="page-title">Profit & Loss Analysis</h2>
-                </div>
+    </div>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3>Total Revenue</h3>
                         <div class="value" id="totalRevenue">$0</div>
-                    </div>
+</div>
                     <div class="stat-card">
                         <h3>Total Expenses</h3>
                         <div class="value" id="totalExpenses">$0</div>
@@ -797,36 +797,36 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-        // Data Storage
-        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
-        let orders = JSON.parse(localStorage.getItem('orders')) || [];
-        let payments = JSON.parse(localStorage.getItem('payments')) || [];
-        let totalRevenue = parseFloat(localStorage.getItem('totalRevenue')) || 0;
-        let totalExpenses = parseFloat(localStorage.getItem('totalExpenses')) || 0;
+<script>
+    // Data Storage
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    let payments = JSON.parse(localStorage.getItem('payments')) || [];
+    let totalRevenue = parseFloat(localStorage.getItem('totalRevenue')) || 0;
+    let totalExpenses = parseFloat(localStorage.getItem('totalExpenses')) || 0;
 
-        // Save Data to Local Storage
-        function saveData() {
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            localStorage.setItem('orders', JSON.stringify(orders));
-            localStorage.setItem('payments', JSON.stringify(payments));
-            localStorage.setItem('totalRevenue', totalRevenue);
-            localStorage.setItem('totalExpenses', totalExpenses);
-        }
+    // Save Data to Local Storage
+    function saveData() {
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        localStorage.setItem('orders', JSON.stringify(orders));
+        localStorage.setItem('payments', JSON.stringify(payments));
+        localStorage.setItem('totalRevenue', totalRevenue);
+        localStorage.setItem('totalExpenses', totalExpenses);
+    }
 
-        // Add Inventory
-        function addInventory() {
-            const name = document.getElementById("itemName").value;
-            const stock = parseInt(document.getElementById("stockQty").value);
-            const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
-            const sellingPrice = parseFloat(document.getElementById("sellingPrice").value);
+    // Add Inventory
+    function addInventory() {
+        const name = document.getElementById("itemName").value;
+        const stock = parseInt(document.getElementById("stockQty").value);
+        const purchasePrice = parseFloat(document.getElementById("purchasePrice").value);
+        const sellingPrice = parseFloat(document.getElementById("sellingPrice").value);
 
-            if (name && stock && purchasePrice && sellingPrice) {
-                inventory.push({ name, stock, purchasePrice, sellingPrice });
-                totalExpenses += stock * purchasePrice;
-                updateInventoryTable();
-                updateProfitLoss();
-                saveData();
+        if (name && stock && purchasePrice && sellingPrice) {
+            inventory.push({ name, stock, purchasePrice, sellingPrice });
+            totalExpenses += stock * purchasePrice;
+            updateInventoryTable();
+            updateProfitLoss();
+            saveData();
                 clearInventoryForm();
             } else {
                 alert("Please fill in all fields!");
@@ -841,13 +841,13 @@
             document.getElementById("sellingPrice").value = "";
         }
 
-        // Update Inventory Table
-        function updateInventoryTable() {
-            const table = document.getElementById("inventoryTable");
-            table.innerHTML = inventory.map((item, index) => `
-                <tr>
-                    <td>${item.name}</td>
-                    <td>${item.stock}</td>
+    // Update Inventory Table
+    function updateInventoryTable() {
+        const table = document.getElementById("inventoryTable");
+        table.innerHTML = inventory.map((item, index) => `
+            <tr>
+                <td>${item.name}</td>
+                <td>${item.stock}</td>
                     <td>$${item.purchasePrice.toFixed(2)}</td>
                     <td>$${item.sellingPrice.toFixed(2)}</td>
                     <td>
@@ -857,108 +857,108 @@
                         <button onclick="deleteInventory(${index})" class="btn btn-danger" style="padding: 0.5rem;">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </td>
-                </tr>
-            `).join("");
+                </td>
+            </tr>
+        `).join("");
             
             document.getElementById("totalItems").textContent = inventory.length;
-        }
+    }
 
-        // Edit Inventory
-        function editInventory(index) {
-            const item = inventory[index];
-            document.getElementById("itemName").value = item.name;
-            document.getElementById("stockQty").value = item.stock;
-            document.getElementById("purchasePrice").value = item.purchasePrice;
-            document.getElementById("sellingPrice").value = item.sellingPrice;
-            deleteInventory(index);
-        }
+    // Edit Inventory
+    function editInventory(index) {
+        const item = inventory[index];
+        document.getElementById("itemName").value = item.name;
+        document.getElementById("stockQty").value = item.stock;
+        document.getElementById("purchasePrice").value = item.purchasePrice;
+        document.getElementById("sellingPrice").value = item.sellingPrice;
+        deleteInventory(index);
+    }
 
-        // Delete Inventory
-        function deleteInventory(index) {
-            const item = inventory.splice(index, 1)[0];
-            totalExpenses -= item.stock * item.purchasePrice;
+    // Delete Inventory
+    function deleteInventory(index) {
+        const item = inventory.splice(index, 1)[0];
+        totalExpenses -= item.stock * item.purchasePrice;
+        updateInventoryTable();
+        updateProfitLoss();
+        saveData();
+    }
+
+    // Place Order
+    function placeOrder() {
+        const name = document.getElementById("orderItem").value;
+        const qty = parseInt(document.getElementById("orderQty").value);
+        const item = inventory.find(i => i.name === name);
+
+        if (item && qty <= item.stock) {
+            const total = qty * item.sellingPrice;
+                orders.push({ name, qty, total, date: new Date().toLocaleDateString() });
+            item.stock -= qty;
+            totalRevenue += total;
+            updateOrdersTable();
             updateInventoryTable();
             updateProfitLoss();
             saveData();
-        }
-
-        // Place Order
-        function placeOrder() {
-            const name = document.getElementById("orderItem").value;
-            const qty = parseInt(document.getElementById("orderQty").value);
-            const item = inventory.find(i => i.name === name);
-
-            if (item && qty <= item.stock) {
-                const total = qty * item.sellingPrice;
-                orders.push({ name, qty, total, date: new Date().toLocaleDateString() });
-                item.stock -= qty;
-                totalRevenue += total;
-                updateOrdersTable();
-                updateInventoryTable();
-                updateProfitLoss();
-                saveData();
                 document.getElementById("orderItem").value = "";
                 document.getElementById("orderQty").value = "";
-            } else {
-                alert("Item not available or insufficient stock!");
-            }
+        } else {
+            alert("Item not available or insufficient stock!");
         }
+    }
 
-        // Update Orders Table
-        function updateOrdersTable() {
-            const table = document.getElementById("ordersTable");
-            table.innerHTML = orders.map((order, index) => `
-                <tr>
-                    <td>${order.name}</td>
-                    <td>${order.qty}</td>
+    // Update Orders Table
+    function updateOrdersTable() {
+        const table = document.getElementById("ordersTable");
+        table.innerHTML = orders.map((order, index) => `
+            <tr>
+                <td>${order.name}</td>
+                <td>${order.qty}</td>
                     <td>$${(order.total / order.qty).toFixed(2)}</td>
                     <td>$${order.total.toFixed(2)}</td>
-                    <td>
+                <td>
                         <button onclick="deleteOrder(${index})" class="btn btn-danger" style="padding: 0.5rem;">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </td>
-                </tr>
-            `).join("");
+                </td>
+            </tr>
+        `).join("");
             
             document.getElementById("totalOrders").textContent = orders.length;
             document.getElementById("totalOrderValue").textContent = orders
                 .reduce((sum, order) => sum + order.total, 0)
                 .toFixed(2);
-        }
+    }
 
-        // Delete Order
-        function deleteOrder(index) {
-            const order = orders.splice(index, 1)[0];
-            totalRevenue -= order.total;
+    // Delete Order
+    function deleteOrder(index) {
+        const order = orders.splice(index, 1)[0];
+        totalRevenue -= order.total;
             const item = inventory.find(i => i.name === order.name);
             if (item) {
                 item.stock += order.qty;
             }
-            updateOrdersTable();
+        updateOrdersTable();
             updateInventoryTable();
-            updateProfitLoss();
-            saveData();
-        }
+        updateProfitLoss();
+        saveData();
+    }
 
-        // Track Payment
-        function trackPayment() {
-            const amount = parseFloat(document.getElementById("incomingPayment").value);
-            if (amount) {
+    // Track Payment
+    function trackPayment() {
+        const amount = parseFloat(document.getElementById("incomingPayment").value);
+        if (amount) {
                 payments.push({
                     amount,
                     date: new Date().toLocaleDateString()
                 });
-                updatePaymentsTable();
-                saveData();
+            updatePaymentsTable();
+            saveData();
                 document.getElementById("incomingPayment").value = "";
-            }
         }
+    }
 
-        // Update Payments Table
-        function updatePaymentsTable() {
-            const table = document.getElementById("paymentsTable");
+    // Update Payments Table
+    function updatePaymentsTable() {
+        const table = document.getElementById("paymentsTable");
             table.innerHTML = payments.map((payment, index) => `
                 <tr>
                     <td>PMT-${String(index + 1).padStart(4, '0')}</td>
@@ -970,34 +970,34 @@
                         </span>
                     </td>
                 </tr>
-            `).join("");
+        `).join("");
             
             document.getElementById("totalPayments").textContent = payments.length;
             document.getElementById("totalPaymentAmount").textContent = payments
                 .reduce((sum, payment) => sum + payment.amount, 0)
                 .toFixed(2);
-        }
+    }
 
-        // Update Profit/Loss
-        function updateProfitLoss() {
+    // Update Profit/Loss
+    function updateProfitLoss() {
             document.getElementById("totalRevenue").innerText = `$${totalRevenue.toFixed(2)}`;
             document.getElementById("totalExpenses").innerText = `$${totalExpenses.toFixed(2)}`;
             document.getElementById("netProfit").innerText = `$${(totalRevenue - totalExpenses).toFixed(2)}`;
-        }
+    }
 
-        // Filter Inventory
-        function filterInventory() {
-            const searchTerm = document.getElementById("searchInventory").value.toLowerCase();
-            const table = document.getElementById("inventoryTable");
+    // Filter Inventory
+    function filterInventory() {
+        const searchTerm = document.getElementById("searchInventory").value.toLowerCase();
+        const table = document.getElementById("inventoryTable");
             
             table.innerHTML = inventory
                 .filter(item => item.name.toLowerCase().includes(searchTerm))
                 .map(item => {
                     const index = inventory.findIndex(i => i.name === item.name);
                     return `
-                        <tr>
-                            <td>${item.name}</td>
-                            <td>${item.stock}</td>
+            <tr>
+                <td>${item.name}</td>
+                <td>${item.stock}</td>
                             <td>$${item.purchasePrice.toFixed(2)}</td>
                             <td>$${item.sellingPrice.toFixed(2)}</td>
                             <td>
@@ -1007,8 +1007,8 @@
                                 <button onclick="deleteInventory(${index})" class="btn btn-danger" style="padding: 0.5rem;">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                            </td>
-                        </tr>
+                </td>
+            </tr>
                     `;
                 })
                 .join("");
@@ -1077,11 +1077,11 @@
             }
         });
 
-        // Initialize Tables
-        updateInventoryTable();
-        updateOrdersTable();
-        updatePaymentsTable();
-        updateProfitLoss();
+    // Initialize Tables
+    updateInventoryTable();
+    updateOrdersTable();
+    updatePaymentsTable();
+    updateProfitLoss();
 
         // Export data to Excel
         function exportToExcel() {

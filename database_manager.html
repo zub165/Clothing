@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-success {
+            background-color: #dcfce7;
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background-color: #fef9c3;
+            color: var(--warning-color);
+        }
+
+        .status-error {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8">Database Manager</h1>
+
+        <!-- Connection Status -->
+        <div class="card">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-semibold">Database Connection</h2>
+                <span class="status-badge status-success">
+                    <i class="fas fa-check-circle"></i>
+                    Connected
+                </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <p class="text-gray-600">Host: <span class="font-medium">localhost</span></p>
+                    <p class="text-gray-600">Database: <span class="font-medium">clothing_business</span></p>
+                </div>
+                <div>
+                    <p class="text-gray-600">User: <span class="font-medium">clothing_user</span></p>
+                    <p class="text-gray-600">Tables: <span class="font-medium">4</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup & Restore -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Backup & Restore</h2>
+            <div class="flex flex-wrap gap-4">
+                <button class="btn btn-primary" onclick="startBackup()">
+                    <i class="fas fa-download"></i>
+                    Create Backup
+                </button>
+                <button class="btn btn-success" onclick="showRestoreModal()">
+                    <i class="fas fa-upload"></i>
+                    Restore Database
+                </button>
+                <button class="btn btn-danger" onclick="showResetModal()">
+                    <i class="fas fa-trash-alt"></i>
+                    Reset Database
+                </button>
+            </div>
+
+            <!-- Backup History -->
+            <div class="table-container">
+                <h3 class="text-lg font-semibold mb-2">Backup History</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Size</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backupHistory">
+                        <!-- Backup history will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table Management -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Table Management</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Table Name</th>
+                            <th>Records</th>
+                            <th>Size</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableList">
+                        <tr>
+                            <td>inventory</td>
+                            <td>0</td>
+                            <td>16 KB</td>
+                            <td>2024-03-17 22:56:24</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="viewTable('inventory')">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>orders</td>
+                            <td>0</td>
+                            <td>16 KB</td>
+                            <td>2024-03-17 22:56:24</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="viewTable('orders')">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>payments</td>
+                            <td>0</td>
+                            <td>16 KB</td>
+                            <td>2024-03-17 22:56:24</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="viewTable('payments')">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>financial_summary</td>
+                            <td>0</td>
+                            <td>16 KB</td>
+                            <td>2024-03-17 22:56:24</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="viewTable('financial_summary')">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restore Modal -->
+    <div id="restoreModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-semibold mb-4">Restore Database</h2>
+            <p class="text-gray-600 mb-4">Select a backup file to restore the database:</p>
+            <input type="file" accept=".sql,.zip" class="mb-4">
+            <div class="flex justify-end gap-4">
+                <button class="btn btn-danger" onclick="closeModal('restoreModal')">Cancel</button>
+                <button class="btn btn-success" onclick="startRestore()">Restore</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-semibold mb-4">Reset Database</h2>
+            <p class="text-gray-600 mb-4">Are you sure you want to reset the database? This action cannot be undone.</p>
+            <div class="flex justify-end gap-4">
+                <button class="btn btn-primary" onclick="closeModal('resetModal')">Cancel</button>
+                <button class="btn btn-danger" onclick="resetDatabase()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progressModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-semibold mb-4">Operation in Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: 0%"></div>
+            </div>
+            <p class="text-gray-600 mt-2" id="progressText">Starting operation...</p>
+        </div>
+    </div>
+
+    <script>
+        // Show modal
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Show restore modal
+        function showRestoreModal() {
+            showModal('restoreModal');
+        }
+
+        // Show reset modal
+        function showResetModal() {
+            showModal('resetModal');
+        }
+
+        // Start backup process
+        function startBackup() {
+            showModal('progressModal');
+            const progressBar = document.querySelector('.progress-bar-fill');
+            const progressText = document.getElementById('progressText');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `Backing up database... ${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        closeModal('progressModal');
+                        updateBackupHistory();
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        // Start restore process
+        function startRestore() {
+            closeModal('restoreModal');
+            showModal('progressModal');
+            const progressBar = document.querySelector('.progress-bar-fill');
+            const progressText = document.getElementById('progressText');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `Restoring database... ${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        closeModal('progressModal');
+                        alert('Database restored successfully!');
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        // Reset database
+        function resetDatabase() {
+            closeModal('resetModal');
+            showModal('progressModal');
+            const progressBar = document.querySelector('.progress-bar-fill');
+            const progressText = document.getElementById('progressText');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `Resetting database... ${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        closeModal('progressModal');
+                        alert('Database reset successfully!');
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        // View table contents
+        function viewTable(tableName) {
+            alert(`Viewing ${tableName} table... (To be implemented)`);
+        }
+
+        // Update backup history
+        function updateBackupHistory() {
+            const backupHistory = document.getElementById('backupHistory');
+            const date = new Date().toLocaleString();
+            const newBackup = `
+                <tr>
+                    <td>${date}</td>
+                    <td>2.5 MB</td>
+                    <td>
+                        <span class="status-badge status-success">
+                            <i class="fas fa-check-circle"></i>
+                            Completed
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="downloadBackup('${date}')">
+                            <i class="fas fa-download"></i>
+                            Download
+                        </button>
+                    </td>
+                </tr>
+            `;
+            backupHistory.innerHTML = newBackup + backupHistory.innerHTML;
+        }
+
+        // Download backup
+        function downloadBackup(date) {
+            alert(`Downloading backup from ${date}... (To be implemented)`);
+        }
+    </script>
+</body>
+</html> 
