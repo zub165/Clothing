@@ -31,8 +31,8 @@ jobs:
 
   deploy:
     needs: build
-    if: ${{ secrets.VPS_HOST != '' && secrets.VPS_USER != '' && secrets.SSH_PASSWORD != '' }}
     runs-on: ubuntu-latest
+    # Requires repo secrets: VPS_HOST, VPS_USER, SSH_PASSWORD
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
