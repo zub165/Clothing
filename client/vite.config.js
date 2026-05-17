@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const base = process.env.VITE_BASE_PATH || '/shop/'
+
 export default defineConfig({
   plugins: [react()],
-  base: '/shop/',
+  base,
   server: {
     port: 5180,
     proxy: {

@@ -11,6 +11,10 @@ import {
 } from 'react-router-dom';
 import { api } from './api';
 
+const routerBase =
+  (import.meta.env.BASE_URL || '/shop/').replace(/\/$/, '') || '/shop';
+const shopHome = `${routerBase}/`;
+
 const ShopContext = createContext(null);
 
 function useShop() {
@@ -150,7 +154,7 @@ function Nav() {
                 style={{ background: 'none', border: 'none' }}
                 onClick={() => {
                   localStorage.removeItem('clothify_token');
-                  window.location.href = '/shop/';
+                  window.location.href = shopHome;
                 }}
               >
                 Log out
@@ -978,7 +982,7 @@ function NotFound() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/shop">
+    <BrowserRouter basename={routerBase}>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

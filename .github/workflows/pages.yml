@@ -1,0 +1,65 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Build React shop for GitHub Pages
+        working-directory: client
+        env:
+          VITE_BASE_PATH: /Clothing/shop/
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+        run: |
+          npm ci
+          cp .env.github-pages .env
+          [ -n "$VITE_API_URL" ] && echo "VITE_API_URL=$VITE_API_URL" >> .env
+          npm run build
+
+      - name: Assemble static site
+        run: |
+          mkdir -p _site/shop
+          cp index.html _site/
+          cp database_manager.html _site/
+          cp -r client/dist/. _site/shop/
+          cp _site/shop/index.html _site/shop/404.html
+          cp public/database_manager.html _site/database_manager.html 2>/dev/null || true
+          echo "Clothify static site ready"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

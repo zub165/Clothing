@@ -45,7 +45,23 @@ npm run db:migrate
 
 ---
 
-## 2. Push to GitHub
+## 2. GitHub Pages (static frontend)
+
+Push to `main` runs `.github/workflows/pages.yml`.
+
+| URL | Content |
+|-----|---------|
+| https://zub165.github.io/Clothing/ | Admin dashboard (`index.html`) |
+| https://zub165.github.io/Clothing/shop/ | React storefront |
+| https://zub165.github.io/Clothing/database_manager.html | DB manager |
+
+**API on Pages:** GitHub Pages is static only. Add repo secret `VITE_API_URL` = your live API (e.g. `https://yourdomain.com`) so the shop can call `/api/shop/*`. Without it, the UI loads but product data needs a backend.
+
+Enable once: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+---
+
+## 3. Push to GitHub
 
 Repo: https://github.com/zub165/Clothing
 
