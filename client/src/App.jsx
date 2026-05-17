@@ -360,8 +360,17 @@ function Home() {
     }
   };
 
+  const apiBase = import.meta.env.VITE_API_URL || '';
+  const showApiHint = import.meta.env.PROD && !apiBase;
+
   return (
     <div>
+      {showApiHint && (
+        <div className="layout api-banner">
+          <strong>Backend not connected.</strong> Run the API on your desktop (<code>npm start</code> on port 3100),
+          or set GitHub secret <code>VITE_API_URL</code> to your GoDaddy API when live.
+        </div>
+      )}
       <section className="layout hero">
         <div className="hero-content">
           <h1>
