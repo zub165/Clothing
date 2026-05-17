@@ -18,9 +18,11 @@ const dbConfig = {
 
 // API Configuration
 const apiConfig = {
-    port: process.env.PORT || 3000,
-    jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
-    corsOrigins: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000']
+    port: process.env.PORT || 3100,
+    jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
+    corsOrigins: process.env.CORS_ORIGINS
+        ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+        : ['http://localhost:3100', 'http://localhost:5180', 'http://127.0.0.1:5180']
 };
 
 module.exports = {

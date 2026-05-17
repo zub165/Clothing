@@ -7,13 +7,32 @@ const path = require('path');
 const excel = require('exceljs');
 const upload = require('multer')();
 
+const { apiConfig } = require('./config');
+const registerShopApi = require('./shop-api');
+
+// Load environment variables first
+require('dotenv').config();
+
 const app = express();
-app.use(cors());
+// Dynamic CORS from config.js / CORS_ORIGINS env
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || apiConfig.corsOrigins.includes(origin) || apiConfig.corsOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      if (process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.static('public'));
-
-// Load environment variables
-require('dotenv').config();
+// React production build
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
 // Create MySQL connection
 const connection = mysql.createConnection({
@@ -397,7 +416,21 @@ app.post('/api/import-excel', upload.single('file'), (req, res) => {
         });
 });
 
-const PORT = process.env.PORT || 3000;
+registerShopApi(app, connection);
+
+// SPA fallback for React shop
+app.get(['/shop', '/shop/*'], (req, res) => {
+  const index = path.join(__dirname, 'client', 'dist', 'index.html');
+  if (fs.existsSync(index)) {
+    res.sendFile(index);
+  } else {
+    res.status(404).send('Shop frontend not built. Run: cd client && npm run build');
+  }
+});
+
+const PORT = process.env.PORT || 3100;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Clothing API running on http://localhost:${PORT}`);
+  console.log(`Admin: http://localhost:${PORT}/database_manager.html`);
+  console.log(`Shop:  http://localhost:${PORT}/shop`);
 }); 

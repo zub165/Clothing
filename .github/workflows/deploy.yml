@@ -2,35 +2,35 @@ name: Deploy to GoDaddy VPS
 
 on:
   push:
-    branches: [ main ]  # or your default branch
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-          
-      - name: Install Dependencies
-        run: npm install
-        
-      - name: Run Build
-        run: npm run build --if-present
-        
+
+      - name: Install and build
+        run: |
+          npm ci
+          cd client && npm ci && npm run build
+
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: 208.109.215.53
-          username: newgen
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
             cd ~/clothing-business
             git pull origin main
-            npm install
-            npm run build --if-present
-            pm2 restart all # if using PM2 
+            npm ci
+            cd client && npm ci && npm run build && cd ..
+            pm2 restart clothify-api || pm2 start server.js --name clothify-api
+            pm2 save

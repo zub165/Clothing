@@ -90,15 +90,22 @@ if [ $? -eq 0 ]; then
     print_message "Database setup completed successfully!" "$GREEN"
     
     # Create .env file with database credentials
+    mysql -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" < schema-shop.sql 2>/dev/null || print_message "Shop schema: run schema-shop.sql manually if columns exist." "$YELLOW"
+    mysql -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" < seed-sample.sql 2>/dev/null || true
+
     cat > .env << EOF
 DB_HOST=localhost
 DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASS}
 DB_NAME=${DB_NAME}
 DB_PORT=3306
+PORT=3100
+JWT_SECRET=dev-change-me
+CORS_ORIGINS=http://localhost:5180,http://127.0.0.1:5180,http://localhost:3100
+NODE_ENV=development
 EOF
-    
-    print_message "Environment file (.env) created with database credentials." "$GREEN"
+
+    print_message "Environment file (.env) created. API port 3100, React dev 5180." "$GREEN"
 else
     print_message "Error setting up database. Please check the error message above." "$RED"
 fi 

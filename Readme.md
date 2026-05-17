@@ -1,4 +1,28 @@
-# Clothing Business Database Manager
+# Clothing Business — Clothify Stack
+
+Full-stack clothing business platform on [GitHub](https://github.com/zub165/Clothing):
+
+| Layer | Path | URL (local) |
+|-------|------|-------------|
+| **API + Admin** | `server.js`, `shop-api.js` | http://localhost:3100 |
+| **React shop** | `client/` | http://localhost:5180/shop/ (dev) or http://localhost:3100/shop/ (prod build) |
+| **Flutter** | `mobile/` | Points to API via `API_URL` |
+| **Reference** | `context.md` | Architecture, ports, APIs |
+| **VPS deploy** | `deploy/GODADDY_VPS.md` | GoDaddy production |
+
+### Quick start
+
+```bash
+cp .env.example .env && ./setup_database.sh
+npm install && cd client && npm install && cd ..
+npm run build:client && npm start
+```
+
+See **context.md** for ports, API list, and production steps.
+
+---
+
+## Database Manager (original)
 
 A comprehensive web-based interface for managing your clothing business database. This application provides real-time database management, backup/restore capabilities, and financial tracking features.
 

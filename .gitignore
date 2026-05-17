@@ -10,9 +10,14 @@ yarn-error.log
 .env.*.local
 
 # Build output
-dist/
 build/
 .next/
+client/node_modules/
+
+# Flutter
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins-dependencies
 
 # IDE and editor files
 .idea/
