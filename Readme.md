@@ -1,24 +1,34 @@
-# Clothing Business — Clothify Stack
+# Clothify — Clothing Website
 
-Full-stack clothing business platform on [GitHub](https://github.com/zub165/Clothing):
+Live site (GitHub Pages): **https://zub165.github.io/Clothing/**
 
-| Layer | Path | URL (local) |
-|-------|------|-------------|
-| **API + Admin** | `server.js`, `shop-api.js` | http://localhost:3100 |
-| **React shop** | `client/` | http://localhost:5180/shop/ (dev) or http://localhost:3100/shop/ (prod build) |
-| **Flutter** | `mobile/` | Points to API via `API_URL` |
-| **Reference** | `context.md` | Architecture, ports, APIs |
-| **VPS deploy** | `deploy/GODADDY_VPS.md` | GoDaddy production |
+| Page | URL |
+|------|-----|
+| **Home** | https://zub165.github.io/Clothing/ |
+| **Shop** | https://zub165.github.io/Clothing/shop/ |
+| **Business admin** | https://zub165.github.io/Clothing/admin/ |
 
-### Quick start
+Backend API runs on your **local desktop** now (`npm start` :3100). Production API: **GoDaddy VPS** (see `deploy/GODADDY_VPS.md`).
+
+### Local development
 
 ```bash
 cp .env.example .env && ./setup_database.sh
 npm install && cd client && npm install && cd ..
-npm run build:client && npm start
+
+# Terminal 1 — API
+npm start
+
+# Terminal 2 — React dev
+npm run dev:client
 ```
 
-See **context.md** for ports, API list, and production steps.
+- API: http://localhost:3100  
+- Shop dev: http://localhost:5180/shop/  
+
+Push to `main` auto-deploys the website via GitHub Actions (**Deploy GitHub Pages**).
+
+See **context.md** for architecture and API details.
 
 ---
 

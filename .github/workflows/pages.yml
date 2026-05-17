@@ -27,7 +27,7 @@ jobs:
           cache: npm
           cache-dependency-path: client/package-lock.json
 
-      - name: Build React shop for GitHub Pages
+      - name: Build React shop
         working-directory: client
         env:
           VITE_BASE_PATH: /Clothing/shop/
@@ -38,15 +38,17 @@ jobs:
           [ -n "$VITE_API_URL" ] && echo "VITE_API_URL=$VITE_API_URL" >> .env
           npm run build
 
-      - name: Assemble static site
+      - name: Assemble Clothify website
         run: |
-          mkdir -p _site/shop
-          cp index.html _site/
-          cp database_manager.html _site/
+          mkdir -p _site/shop _site/admin
+          cp public/landing.html _site/index.html
+          cp index.html _site/admin/index.html
+          cp database_manager.html _site/database_manager.html
           cp -r client/dist/. _site/shop/
-          cp _site/shop/index.html _site/shop/404.html
+          cp client/dist/index.html _site/shop/404.html
+          cp client/public/favicon.svg _site/shop/favicon.svg 2>/dev/null || true
           cp public/database_manager.html _site/database_manager.html 2>/dev/null || true
-          echo "Clothify static site ready"
+          echo "Clothify website deployed to _site"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
