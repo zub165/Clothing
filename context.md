@@ -96,16 +96,13 @@ flutter run --dart-define=API_URL=http://127.0.0.1:3100
 flutter run --dart-define=API_URL=http://10.0.2.2:3100
 ```
 
-## Production (GoDaddy VPS)
+## Local → GitHub → VPS
 
-1. VPS: Node 18+, MySQL, Nginx, PM2.
-2. Clone repo to `~/clothing-business`.
-3. Set `.env`: `NODE_ENV=production`, strong `JWT_SECRET`, `CORS_ORIGINS=https://yourdomain.com`.
-4. `npm install && npm run build && pm2 start server.js --name clothify-api`.
-5. Nginx: proxy `/api` and `/shop` to `127.0.0.1:3100`.
-6. GitHub Actions: set secrets `SSH_PASSWORD`, `VPS_HOST`, `VPS_USER`.
+**Local:** `npm start` (API :3100) + `npm run dev:client` (React :5180, proxies `/api`).  
+**GitHub:** push `main` → CI builds React; deploy workflow runs `deploy/release.sh` on VPS.  
+**VPS:** MySQL + PM2 + Nginx → `https://yourdomain.com/shop/`
 
-See `deploy/GODADDY_VPS.md` for full steps.
+See `deploy/GODADDY_VPS.md` for secrets, bootstrap, and database migration.
 
 ## Data model notes
 

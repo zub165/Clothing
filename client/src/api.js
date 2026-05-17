@@ -33,4 +33,6 @@ export const api = {
   removeWishlist: (id) => request(`/api/shop/wishlist/${id}`, { method: 'DELETE' }),
   checkout: (body) => request('/api/shop/checkout', { method: 'POST', body: JSON.stringify(body) }),
   orders: () => request('/api/shop/orders'),
+  addReview: (id, body) =>
+    request(`/api/shop/products/${id}/reviews`, { method: 'POST', body: JSON.stringify(body) }),
 };

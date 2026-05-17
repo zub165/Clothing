@@ -19,6 +19,14 @@ mobile/.dart_tool/
 mobile/build/
 mobile/.flutter-plugins-dependencies
 
+# Django scaffold (not used by production stack)
+clothify/backend/venv/
+clothify/backend/db.sqlite3
+clothify/backend/media/
+
+# Client build (built on VPS / CI)
+client/dist/
+
 # IDE and editor files
 .idea/
 .vscode/

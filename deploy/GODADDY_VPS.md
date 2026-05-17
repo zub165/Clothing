@@ -1,48 +1,130 @@
-# GoDaddy VPS — Production Deployment
+# Clothify — Local → GitHub → GoDaddy VPS
 
-## 1. Server prerequisites
+End-to-end: React shop + Express API + MySQL.
+
+## Architecture
+
+| Environment | React | API | Database |
+|-------------|-------|-----|----------|
+| **Local** | `:5180` (Vite) | `:3100` | MySQL `localhost:3306` |
+| **Production** | `/shop/` on domain | same host `:3100` (PM2) | MySQL on VPS |
+
+React talks to the API via **relative** `/api/...` (Vite proxy locally, same origin on VPS).
+
+---
+
+## 1. Local development (backend + database)
 
 ```bash
+cd Clothing
+npm run setup:env          # copies .env.example + client/.env.example
+./setup_database.sh        # MySQL user, schemas, seed, writes .env
+npm install
+cd client && npm install && cd ..
+
+# Terminal 1 — API + DB
+npm start                  # http://localhost:3100
+
+# Terminal 2 — React (proxies /api → 3100)
+npm run dev:client         # http://localhost:5180/shop/
+```
+
+Or one command: `npm run dev:all`
+
+**Verify**
+
+- http://localhost:3100/api/status  
+- http://localhost:5180/shop/  
+- http://localhost:3100/database_manager.html  
+
+**Re-run migrations only**
+
+```bash
+npm run db:migrate
+```
+
+---
+
+## 2. Push to GitHub
+
+Repo: https://github.com/zub165/Clothing
+
+```bash
+git add .
+git commit -m "Add deployment pipeline and enhanced shop UI"
+git push origin main
+```
+
+**Never commit** `.env` — only `.env.example` and `.env.production.example`.
+
+On every push to `main`:
+
+- **CI** (`.github/workflows/ci.yml`) — builds React + checks `client/dist`
+- **Deploy** (`.github/workflows/deploy.yml`) — SSH to VPS, `git pull`, `deploy/release.sh`
+
+---
+
+## 3. GitHub repository secrets
+
+Settings → Secrets and variables → Actions:
+
+| Secret | Example | Required |
+|--------|---------|----------|
+| `VPS_HOST` | `123.45.67.89` | Yes |
+| `VPS_USER` | `newgen` | Yes |
+| `SSH_PASSWORD` | VPS SSH password | Yes* |
+| `VPS_SSH_KEY` | Private key PEM | Yes* |
+| `VPS_PORT` | `22` | No |
+| `VPS_APP_DIR` | `~/clothing-business` | No |
+
+\* Use **either** `SSH_PASSWORD` **or** `VPS_SSH_KEY`, not both unless your action supports it.
+
+---
+
+## 4. One-time VPS setup (GoDaddy)
+
+SSH into the server:
+
+```bash
+# Option A — automated bootstrap
+export DOMAIN=yourdomain.com
+export REPO_URL=https://github.com/zub165/Clothing.git
+git clone "$REPO_URL" ~/clothing-business
+cd ~/clothing-business
+bash deploy/vps-bootstrap.sh
+
+# Option B — manual
 sudo apt update && sudo apt upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs mysql-server nginx
+sudo apt install -y nodejs mysql-server nginx git
 sudo npm install -g pm2
-```
 
-## 2. MySQL
+git clone https://github.com/zub165/Clothing.git ~/clothing-business
+cd ~/clothing-business
+cp .env.production.example .env
+nano .env   # DB_PASSWORD, JWT_SECRET, CORS_ORIGINS=https://yourdomain.com
 
-```bash
-sudo mysql_secure_installation
-mysql -u root -p -e "CREATE DATABASE clothing_business;
-  CREATE USER 'clothing_user'@'localhost' IDENTIFIED BY 'STRONG_PASSWORD';
+# MySQL
+sudo mysql -e "CREATE DATABASE clothing_business;
+  CREATE USER 'clothing_user'@'localhost' IDENTIFIED BY 'STRONG_PASS';
   GRANT ALL ON clothing_business.* TO 'clothing_user'@'localhost';
   FLUSH PRIVILEGES;"
+
+chmod +x deploy/*.sh
+./deploy/release.sh
 ```
 
-Upload and run:
+### Nginx + SSL
 
 ```bash
-mysql -u clothing_user -p clothing_business < schema.sql
-mysql -u clothing_user -p clothing_business < schema-shop.sql
-mysql -u clothing_user -p clothing_business < seed-sample.sql
+sudo cp deploy/nginx-clothify.conf /etc/nginx/sites-available/clothify
+sudo sed -i 's/YOUR_DOMAIN/yourdomain.com/g' /etc/nginx/sites-available/clothify
+sudo ln -sf /etc/nginx/sites-available/clothify /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ```
 
-## 3. Application
-
-```bash
-cd ~
-git clone https://github.com/zub165/Clothing.git clothing-business
-cd clothing-business
-cp .env.example .env
-# Edit .env: production values
-npm install
-cd client && npm install && npm run build && cd ..
-pm2 start server.js --name clothify-api
-pm2 save
-pm2 startup
-```
-
-Example `.env` on VPS:
+### Production `.env` (on VPS only)
 
 ```env
 DB_HOST=localhost
@@ -51,40 +133,57 @@ DB_PASSWORD=STRONG_PASSWORD
 DB_NAME=clothing_business
 PORT=3100
 NODE_ENV=production
-JWT_SECRET=long-random-string
-CORS_ORIGINS=https://yourdomain.com
+JWT_SECRET=long-random-string-min-32-chars
+CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 ```
 
-## 4. Nginx
+---
 
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
+## 5. What runs on each deploy
 
-    location / {
-        proxy_pass http://127.0.0.1:3100;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
+`deploy/release.sh` on the VPS:
+
+1. `npm ci` (API)
+2. `cd client && npm ci && npm run build`
+3. `deploy/migrate-db.sh` (schemas + seed if empty)
+4. `pm2 restart clothify-api`
+5. Health check `GET /api/status`
+
+Manual deploy on VPS:
+
+```bash
+cd ~/clothing-business
+git pull origin main
+./deploy/release.sh
 ```
 
-Enable SSL with Certbot: `sudo certbot --nginx -d yourdomain.com`
+---
 
-## 5. GitHub Actions
+## 6. Production URLs
 
-Repository secrets:
+- Shop: `https://yourdomain.com/shop/`
+- API status: `https://yourdomain.com/api/status`
+- Admin: `https://yourdomain.com/database_manager.html`
 
-- `SSH_PASSWORD` — VPS SSH password (or use SSH key action)
-- `VPS_HOST` — server IP
-- `VPS_USER` — e.g. `newgen`
+---
 
-Push to `main` triggers `.github/workflows/deploy.yml`.
+## 7. Database backups (VPS)
 
-## 6. Verify
+```bash
+cd ~/clothing-business
+./backup_database.sh
+```
 
-- `https://yourdomain.com/api/status`
-- `https://yourdomain.com/shop/`
-- `https://yourdomain.com/database_manager.html`
+Schedule with cron if needed.
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Shop 404 | Run `cd client && npm run build` on VPS |
+| API DB error | Check `.env` credentials; `npm run db:migrate` |
+| CORS blocked | Add your domain to `CORS_ORIGINS` in VPS `.env` |
+| Deploy fails SSH | Verify GitHub secrets; test `ssh user@host` |
+| PM2 not running | `pm2 logs clothify-api` |
