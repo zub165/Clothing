@@ -10,8 +10,8 @@ DOMAIN="${DOMAIN:-}"
 echo "=== Clothify VPS bootstrap ==="
 
 if ! command -v node >/dev/null 2>&1; then
-  echo "→ Installing Node.js 18"
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  echo "→ Installing Node.js 22 (required for Vite 8 / React build)"
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
   sudo apt-get install -y nodejs
 fi
 
