@@ -1,15 +1,12 @@
-# Clothify — Local → GitHub → GoDaddy VPS
+# Clothify — Backend on VPS, React on GitHub Pages
 
-End-to-end: React shop + Express API + MySQL.
+| Layer | Where |
+|-------|--------|
+| **React shop + admin UI** | GitHub Pages — https://zub165.github.io/Clothing/ |
+| **API + MySQL (now)** | Your Mac — `npm start` on port **3100** |
+| **API + MySQL (production)** | GoDaddy VPS — Nginx proxies to PM2, **no React build on server** |
 
-## Architecture
-
-| Environment | React | API | Database |
-|-------------|-------|-----|----------|
-| **Local** | `:5180` (Vite) | `:3100` | MySQL `localhost:3306` |
-| **Production** | `/shop/` on domain | same host `:3100` (PM2) | MySQL on VPS |
-
-React talks to the API via **relative** `/api/...` (Vite proxy locally, same origin on VPS).
+Set `SKIP_CLIENT_BUILD=true` on VPS. After deploy, add GitHub secret `VITE_API_URL=https://yourdomain.com` and re-run Pages deploy.
 
 ---
 

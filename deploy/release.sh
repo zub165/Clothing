@@ -19,13 +19,17 @@ echo "=== Clothify release ==="
 echo "→ npm install (API)"
 npm ci --omit=dev 2>/dev/null || npm ci
 
-echo "→ Build React shop"
-cd client
-npm ci
-# Production: same-origin API — empty VITE_API_URL
-export VITE_API_URL="${VITE_API_URL:-}"
-npm run build
-cd ..
+# React is hosted on GitHub Pages — skip client build on VPS unless opted in
+if [ "${SKIP_CLIENT_BUILD:-true}" = "true" ]; then
+  echo "→ Skip React build (SKIP_CLIENT_BUILD=true, frontend on GitHub Pages)"
+else
+  echo "→ Build React shop"
+  cd client
+  npm ci
+  export VITE_API_URL="${VITE_API_URL:-}"
+  npm run build
+  cd ..
+fi
 
 echo "→ Database migrate"
 chmod +x deploy/migrate-db.sh

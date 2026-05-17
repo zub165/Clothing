@@ -2,29 +2,32 @@
 
 Reference for [zub165/Clothing](https://github.com/zub165/Clothing): clothing business admin + customer storefront + mobile apps.
 
-## Architecture
+## Architecture (target setup)
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌──────────────────┐
-│  React Shop     │     │  Flutter iOS/   │     │  Admin HTML      │
-│  (client/)      │     │  Android        │     │  database_mgr    │
-│  :5180 dev      │     │  (mobile/)      │     │  index.html      │
-└────────┬────────┘     └────────┬────────┘     └────────┬─────────┘
-         │                       │                         │
-         └───────────────────────┼─────────────────────────┘
-                                 ▼
-                    ┌────────────────────────┐
-                    │  Express API (server.js)│
-                    │  shop-api.js            │
-                    │  PORT 3100 (default)    │
-                    └────────────┬───────────┘
-                                 ▼
-                    ┌────────────────────────┐
-                    │  MySQL clothing_business│
-                    │  inventory, orders, …   │
-                    │  + shop tables          │
-                    └────────────────────────┘
+  FRONTEND (GitHub Pages)              BACKEND (your machine → VPS later)
+  ───────────────────────              ───────────────────────────────────
+
+  ┌─────────────────────┐              ┌────────────────────────┐
+  │ React shop          │   HTTPS      │ Express API :3100      │
+  │ zub165.github.io/   │ ──────────►  │ shop-api.js            │
+  │   Clothing/shop/    │   /api/shop  │ server.js              │
+  └─────────────────────┘              └───────────┬────────────┘
+  ┌─────────────────────┐                          ▼
+  │ Admin index.html    │              ┌────────────────────────┐
+  │ (same Pages site)   │              │ MySQL clothing_business │
+  └─────────────────────┘              └────────────────────────┘
+
+  NOW:     backend on local desktop (Mac)
+  LATER:   backend on GoDaddy VPS — set GitHub secret VITE_API_URL
 ```
+
+| Layer | Where | URL |
+|-------|--------|-----|
+| **React shop** | GitHub Pages | https://zub165.github.io/Clothing/shop/ |
+| **Admin UI** | GitHub Pages | https://zub165.github.io/Clothing/ |
+| **API + DB (dev)** | Local desktop | http://localhost:3100 |
+| **API + DB (prod)** | GoDaddy VPS | https://yourdomain.com (when live) |
 
 ## Ports (avoid conflicts)
 
@@ -68,24 +71,28 @@ Do **not** reuse 3000, 5174–5177, 8001, or 8099 if other apps run locally.
 
 Default coupon: `WELCOME10` (10% off).
 
-## Local setup
+## Local desktop (backend + React dev)
 
 ```bash
 cd Clothing
 cp .env.example .env
-./setup_database.sh   # MySQL + schema-shop + seed
-npm install
-cd client && npm install && cd ..
-npm run build:client
-npm start             # http://localhost:3100
+./setup_database.sh
+npm install && cd client && npm install && cd ..
 ```
 
-Dev (two terminals):
+**Terminal 1 — backend only**
 
 ```bash
-npm run dev           # API :3100
-npm run dev:client    # React :5180 → proxy /api
+npm start             # API http://localhost:3100
 ```
+
+**Terminal 2 — React (talks to local API)**
+
+```bash
+npm run dev:client    # http://localhost:5180/shop/ → proxies /api → :3100
+```
+
+Or: `npm run dev:all`
 
 Flutter:
 
@@ -96,13 +103,19 @@ flutter run --dart-define=API_URL=http://127.0.0.1:3100
 flutter run --dart-define=API_URL=http://10.0.2.2:3100
 ```
 
-## Local → GitHub → VPS
+## Deploy paths
 
-**Local:** `npm start` (API :3100) + `npm run dev:client` (React :5180, proxies `/api`).  
-**GitHub:** push `main` → CI builds React; deploy workflow runs `deploy/release.sh` on VPS.  
-**VPS:** MySQL + PM2 + Nginx → `https://yourdomain.com/shop/`
+| What | How |
+|------|-----|
+| **React frontend** | Push `main` → `.github/workflows/pages.yml` → GitHub Pages |
+| **Backend (later)** | GoDaddy VPS → `.github/workflows/deploy.yml` → API only (`SKIP_CLIENT_BUILD=true`) |
 
-See `deploy/GODADDY_VPS.md` for secrets, bootstrap, and database migration.
+**GitHub secret (when VPS is ready):** `VITE_API_URL` = `https://yourdomain.com`  
+Then re-run **Deploy GitHub Pages** so the shop calls your VPS API.
+
+**Local `.env`:** keep `https://zub165.github.io` in `CORS_ORIGINS` so Pages can call your desktop API while testing.
+
+See `deploy/GODADDY_VPS.md` for VPS bootstrap (API + MySQL only).
 
 ## Data model notes
 

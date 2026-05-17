@@ -10,6 +10,7 @@
     "build:client": "npm run build --prefix client",
     "build": "npm run build:client",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:client\"",
+    "dev:local": "concurrently \"npm run dev\" \"npm run dev:client\"",
     "db:migrate": "bash deploy/migrate-db.sh",
     "deploy:release": "bash deploy/release.sh",
     "setup:env": "cp -n .env.example .env 2>/dev/null; cp -n client/.env.example client/.env 2>/dev/null; echo 'Edit .env and run ./setup_database.sh'"
