@@ -288,8 +288,8 @@ function Layout() {
   }, []);
 
   const value = useMemo(
-    () => ({ search, setSearch, cartCount, refreshCart, toast }),
-    [search, cartCount, refreshCart, toast]
+    () => ({ search, setSearch, cartCount, refreshCart, toast, toasts }),
+    [search, cartCount, refreshCart, toast, toasts]
   );
 
   return (
@@ -316,7 +316,10 @@ function Home() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.categories().then(setCategories).catch(() => {});
+    api
+      .categories()
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .catch(() => setCategories([]));
   }, []);
 
   useEffect(() => {
@@ -329,7 +332,7 @@ function Home() {
     api
       .products(params)
       .then((list) => {
-        setProducts(list);
+        setProducts(Array.isArray(list) ? list : []);
         setLoading(false);
       })
       .catch((e) => {
@@ -561,7 +564,7 @@ function ProductDetail() {
         <div className="option-group">
           <label>Size</label>
           <div className="pill-row">
-            {product.sizes.map((s) => (
+            {(product.sizes || []).map((s) => (
               <button key={s} type="button" className={`pill ${size === s ? 'active' : ''}`} onClick={() => setSize(s)}>
                 {s}
               </button>
@@ -571,7 +574,7 @@ function ProductDetail() {
         <div className="option-group">
           <label>Color</label>
           <div className="pill-row">
-            {product.colors.map((c) => (
+            {(product.colors || []).map((c) => (
               <button key={c} type="button" className={`pill ${color === c ? 'active' : ''}`} onClick={() => setColor(c)}>
                 {c}
               </button>
