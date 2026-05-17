@@ -175,7 +175,16 @@ function Nav() {
         </button>
       </div>
       <div className={`layout mobile-drawer ${menuOpen ? 'open' : ''}`}>
-        <Link to="/" onClick={() => setMenuOpen(false)}>
+        <div className="mobile-drawer-search nav-search">
+          <IconSearch />
+          <input
+            placeholder="Search…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search products"
+          />
+        </div>
+        <Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>
           Shop
         </Link>
         <Link to="/wishlist" onClick={() => setMenuOpen(false)}>
@@ -194,7 +203,7 @@ function Nav() {
               className="nav-link"
               onClick={() => {
                 localStorage.removeItem('clothify_token');
-                window.location.href = '/shop/';
+                window.location.href = shopHome;
               }}
             >
               Log out
@@ -286,7 +295,9 @@ function Layout() {
   return (
     <ShopContext.Provider value={value}>
       <Nav />
-      <Outlet />
+      <main id="main-content">
+        <Outlet />
+      </main>
       <Footer />
       <Toasts />
     </ShopContext.Provider>
@@ -983,6 +994,9 @@ function NotFound() {
 export default function App() {
   return (
     <BrowserRouter basename={routerBase}>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

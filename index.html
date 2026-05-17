@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Clothing Business Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -275,7 +278,8 @@
         .table-container {
             margin: 1rem 0;
             border-radius: 0.5rem;
-            overflow: hidden;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -355,17 +359,30 @@
             color: var(--text-color);
         }
 
-        /* Responsive Design */
+        /* Responsive: iPhone, iPad, TV */
+        .sidebar {
+            padding-top: max(1.25rem, env(safe-area-inset-top));
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .sidebar-toggle {
+            top: max(1rem, env(safe-area-inset-top));
+            left: max(1rem, env(safe-area-inset-left));
+        }
+
         @media (max-width: 900px) {
             .sidebar-toggle {
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                min-width: 44px;
+                min-height: 44px;
             }
 
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+                width: min(300px, 88vw);
             }
 
             .sidebar.open {
@@ -378,11 +395,74 @@
 
             .main-content {
                 margin-left: 0;
-                padding: 5rem 1.25rem 2rem;
+                padding: 5rem max(1rem, env(safe-area-inset-right)) 2rem max(1rem, env(safe-area-inset-left));
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .nav-item {
+                min-height: 44px;
+            }
+
+            thead th,
+            tbody td {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .form-control,
+            .btn {
+                min-height: 44px;
+                font-size: 16px;
+            }
+
+            .theme-switcher {
+                bottom: max(1rem, env(safe-area-inset-bottom));
+                right: max(1rem, env(safe-area-inset-right));
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1194px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1920px) {
+            .main-content {
+                max-width: 1800px;
+                margin-left: 260px;
+                margin-right: auto;
+            }
+
+            html {
+                font-size: 18px;
+            }
+
+            .stat-card .value {
+                font-size: 2rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            .main-content {
+                max-width: 2200px;
+            }
+
+            html {
+                font-size: 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition-duration: 0.01ms !important;
             }
         }
 
