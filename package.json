@@ -1,6 +1,6 @@
 {
   "name": "clothing-business-db-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Database management interface for clothing business",
   "main": "server.js",
   "scripts": {
@@ -19,15 +19,18 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.18.3",
+    "express": "^4.22.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.9.2",
     "exceljs": "^4.4.0",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.2.0",
     "chart.js": "^4.4.1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0",
+    "concurrently": "^10.0.3",
     "nodemon": "^3.1.0"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 } 
