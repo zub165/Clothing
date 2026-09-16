@@ -1,36 +1,41 @@
 {
-  "name": "clothing-business-db-manager",
-  "version": "1.0.1",
-  "description": "Database management interface for clothing business",
-  "main": "server.js",
+  "name": "configurator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "dev:client": "npm run dev --prefix client",
-    "build:client": "npm run build --prefix client",
-    "build": "npm run build:client",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev:client\"",
-    "dev:local": "concurrently \"npm run dev\" \"npm run dev:client\"",
-    "db:migrate": "bash deploy/migrate-db.sh",
-    "deploy:release": "bash deploy/release.sh",
-    "setup:env": "cp -n .env.example .env 2>/dev/null; cp -n client/.env.example client/.env 2>/dev/null; echo 'Edit .env and run ./setup_database.sh'"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.22.2",
-    "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.9.2",
-    "exceljs": "^4.4.0",
-    "multer": "^2.2.0",
-    "chart.js": "^4.4.1"
+    "@react-three/drei": "^9.58.5",
+    "@react-three/fiber": "^8.12.0",
+    "framer-motion": "^10.9.4",
+    "maath": "^0.5.3",
+    "react": "^18.2.0",
+    "react-color": "^2.19.3",
+    "react-dom": "^18.2.0",
+    "three": "^0.150.1",
+    "valtio": "^1.10.3"
   },
   "devDependencies": {
-    "concurrently": "^10.0.3",
-    "nodemon": "^3.1.0"
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.3.0",
+    "vite": "^4.2.0"
   },
-  "overrides": {
-    "uuid": "^11.1.1"
-  }
-} 
+
+  "keywords":[
+        "clothing", 
+        "customization", 
+        "configurator", 
+        "react", 
+        "threejs",
+        "react-three-fiber", 
+        "3D"
+    ]
+}
